@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import personService from './services/persons'
+import Notification from './components/notification'
 
 const FilterForm = ({filterText, handleFilterChange}) => (
   <div> filter shown with <input value={filterText} onChange={handleFilterChange}/> </div>
@@ -30,6 +31,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterText, setFilterText] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [error, setError] = useState(false)
 
   const handleNameChange = (event) => setNewName(event.target.value)
   const handleNumberChange = (event) => setNewNumber(event.target.value)
@@ -49,6 +52,11 @@ const App = () => {
           .then(returnedPerson => {
             const newPersons = persons.map(person => person.id !== idToUpdate ? person : returnedPerson)
             setPersons(newPersons)
+            notification5sec(`Updated number of ${returnedPerson.name}.`)
+          })
+          .catch(error => {
+            setError(true)
+            notification5sec(`Information of ${newName} has already been removed from the server.`)
           })
         }
     else {
@@ -56,21 +64,29 @@ const App = () => {
       .create(newPerson)
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
-        setNewName('')
-        setNewNumber('')
+        notification5sec(`Added ${returnedPerson.name}.`)
       })
     }
+    setNewName('')
+    setNewNumber('')
   }
   const handleDelete = id => {
-    if (window.confirm(`Delete ${persons.find(person => person.id === id).name}?`)) {
+    const nameToDelete = persons.find(person => person.id === id).name
+    if (window.confirm(`Delete ${nameToDelete}?`)) {
       personService
       .delete_(id)
       .then(response => {
         const newPersons = persons.filter(person => person.id !== id)
         setPersons(newPersons)
+        notification5sec(`Deleted ${nameToDelete}.`)
+      })
+      .catch(error => {
+        setError(true)
+        notification5sec(`Information of ${nameToDelete} has already been removed from the server.`)
       })
     }
   }
+  
   const dataFetch = () => {
     personService.getAll()
     .then(initialPersons =>
@@ -78,9 +94,18 @@ const App = () => {
   }
   useEffect(dataFetch, [])
 
+  const notification5sec = (message) => {
+    setNotification(message)
+    setTimeout(() => {
+      setNotification(null)
+      setError(false)
+    }, 5000)
+  }
+
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notification} isError={error} />
       <FilterForm filterText={filterText} handleFilterChange={handleFilterChange} />
       <h2> Add a new </h2>
       <PersonForm {...{newName, newNumber, handleNameChange, handleNumberChange, handleAdd}} />

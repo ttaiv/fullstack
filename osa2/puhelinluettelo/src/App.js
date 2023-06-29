@@ -44,7 +44,11 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-    if (persons.map(person => person.name).includes(newName)
+    if (newName.length === 0 || newNumber.length === 0) {
+      setError(true)
+      notification5sec('Name or number is missing')
+    }
+    else if (persons.map(person => person.name).includes(newName)
         && window.confirm(`${newPerson.name} is already added to the phonebook. Replace the old number with the new one?`)) {
           const idToUpdate = persons.find(person => person.name === newName).id
           personService

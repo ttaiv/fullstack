@@ -38,6 +38,21 @@ const App = () => {
   const handleNumberChange = (event) => setNewNumber(event.target.value)
   const handleFilterChange = (event) => setFilterText(event.target.value)
 
+  const updatePerson = (newPerson) => {
+    const idToUpdate = persons.find(person => person.name === newPerson.name).id
+    personService
+    .update(idToUpdate, newPerson)
+    .then(returnedPerson => {
+      const newPersons = persons.map(person => person.id !== idToUpdate ? person : returnedPerson)
+      setPersons(newPersons)
+      notification5sec(`Updated number of ${returnedPerson.name}.`)
+    })
+    .catch(error => {
+      setError(true)
+      notification5sec(error.response.data.error)
+    })
+  }
+
   const handleAdd = (event) => {
     event.preventDefault()
     const newPerson = {
@@ -50,26 +65,19 @@ const App = () => {
     }
     else if (persons.map(person => person.name).includes(newName)
         && window.confirm(`${newPerson.name} is already added to the phonebook. Replace the old number with the new one?`)) {
-          const idToUpdate = persons.find(person => person.name === newName).id
-          personService
-          .update(idToUpdate, newPerson)
-          .then(returnedPerson => {
-            const newPersons = persons.map(person => person.id !== idToUpdate ? person : returnedPerson)
-            setPersons(newPersons)
-            notification5sec(`Updated number of ${returnedPerson.name}.`)
-          })
-          .catch(error => {
-            setError(true)
-            notification5sec(`Information of ${newName} has already been removed from the server.`)
-          })
-        }
-    else {
+          updatePerson(newPerson)
+    }
+    else {  // Add the new person
       personService
-      .create(newPerson)
-      .then(returnedPerson => {
-        setPersons(persons.concat(returnedPerson))
-        notification5sec(`Added ${returnedPerson.name}.`)
-      })
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          notification5sec(`Added ${returnedPerson.name}.`)
+        })
+        .catch(error => {
+          setError(true)
+          notification5sec(error.response.data.error)
+        })
     }
     setNewName('')
     setNewNumber('')

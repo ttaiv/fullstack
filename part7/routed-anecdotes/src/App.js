@@ -51,10 +51,9 @@ const Footer = () => (
 );
 
 const CreateNew = (props) => {
-  const contentField = useField('text');
-  const authorField = useField('text');
-  const infoField = useField('text');
-
+  const { reset: contentReset , ...contentField } = useField('text');
+  const { reset: authorReset, ...authorField } = useField('text');
+  const { reset: infoReset, ...infoField } = useField('text');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,6 +63,12 @@ const CreateNew = (props) => {
       info: infoField.value,
       votes: 0
     });
+  };
+
+  const clearFields = () => {
+    contentReset();
+    authorReset();
+    infoReset();
   };
 
   return (
@@ -83,6 +88,7 @@ const CreateNew = (props) => {
           <input {...infoField} />
         </div>
         <button>create</button>
+        <button type="button" onClick={() => clearFields()}>reset</button>
       </form>
     </div>
   );

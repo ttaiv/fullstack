@@ -150,6 +150,7 @@ const typeDefs = `
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
     me: User
+    favoriteGenreBooks: [Book]!
   }
   type Mutation {
     addBook(
@@ -197,7 +198,13 @@ const resolvers = {
       return returnedBooks
     },
     allAuthors: async () => Author.find({}),
-    me: (root, args, context) => context.currentUser
+    me: (root, args, context) => context.currentUser,
+    favoriteGenreBooks: async (root, args, context) => {
+      validateAutentication(context)
+      const favouriteGenre = context.currentUser.favoriteGenre
+      const books = await Book.find({ genres: { $in: [favouriteGenre] } }).populate('author')
+      return books
+    }
   },
   Author : {
     bookCount: async (root) => {

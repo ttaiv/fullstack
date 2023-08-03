@@ -5,6 +5,7 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
+import Recommendations from './components/Recommendations'
 
 const NavigationMenu = ({ loginSuccesful, handleLogout }) => {
   const menuStyle = {
@@ -29,8 +30,13 @@ const NavigationMenu = ({ loginSuccesful, handleLogout }) => {
     <div style={menuStyle}>
       <Link to='/' style={linkStyle}>authors</Link>
       <Link to='/books' style={linkStyle}>books</Link>
-      {loginSuccesful && <Link to='/addBook' style={linkStyle}>add book</Link>}
-      {loginSuccesful && <span onClick={handleLogout} style={logoutStyle}>logout</span>}
+      {loginSuccesful &&
+        <>
+          <Link to='/addBook' style={linkStyle}>add book</Link>
+          <Link to='/recommended' style={linkStyle}>recommended</Link>
+          <span onClick={handleLogout} style={logoutStyle}>logout</span>
+        </>
+      }
       {!loginSuccesful && <Link to='/login' style={linkStyle}>login</Link>}
     </div>
   )
@@ -55,6 +61,7 @@ const App = () => {
         <Route path='/books' element={<Books />} />
         <Route path='/addBook' element={<NewBook />} />
         <Route path='/login' element={<LoginForm setToken={setToken} />} />
+        <Route path='/recommended' element={<Recommendations />} />
       </Routes>
     </div>
   )

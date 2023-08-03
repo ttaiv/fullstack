@@ -15,15 +15,14 @@ const Login = ({ setToken }) => {
       localStorage.setItem('library-user-token', token)
       setToken(token)
       navigate('/')
+      setUsername('')
+      setPassword('')
     }
   })
 
   const submit = async (event) => {
     event.preventDefault()
     login({ variables: { username, password } })
-
-    setUsername('')
-    setPassword('')
   }
 
   return (

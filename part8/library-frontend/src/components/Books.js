@@ -7,7 +7,10 @@ const Books = () => {
 
   const [selectedGenre, setSelectedGenre] = useState(null)
 
-  const booksResult = useQuery(ALL_BOOKS)
+  const booksResult = useQuery(ALL_BOOKS, {
+    variables: { genre: selectedGenre ? selectedGenre.value : null },
+    fetchPolicy: 'network-only'
+  })
 
   if (booksResult.loading) {
     return (
@@ -15,10 +18,9 @@ const Books = () => {
     )
   }
 
-  const allBooks = booksResult.data.allBooks
-  const genres = [...new Set(allBooks.flatMap(b => b.genres))]
-  const genreOptions = genres.map(g => ({ value: g, label: g }))
-  const books = selectedGenre ? allBooks.filter(b => b.genres.includes(selectedGenre.value)) : allBooks
+  const books = booksResult.data.allBooksOfGenre
+  const genres = [ ...new Set(booksResult.data.justGenres.flatMap(b => b.genres))] // Creating set to remove duplicates
+  const genreOptions = genres.map(g => ({ value: g, label: g })).concat({ value: null, label: 'all genres' })
 
   return (
     <div>

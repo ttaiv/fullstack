@@ -185,26 +185,17 @@ const resolvers = {
     addBook: async (root, args) => {
       let author = await Author.findOne({ name: args.author })
       if (!author) {
-        console.log('author not found')
         author = new Author({ name: args.author })
       }
       const book = new Book({ ...args, author: author._id })
-      console.log(book)
 
       try {
+        await book.validate()
+        await author.validate()
         await book.save()
-      } catch (error) {
-        throw new GraphQLError('Saving book failed', {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-            error
-          }
-        })
-      }
-      try {
         await author.save()
       } catch (error) {
-        throw new GraphQLError('Saving author failed', {
+        throw new GraphQLError('Book or author validation failed', {
           extensions: {
             code: 'BAD_USER_INPUT',
             error

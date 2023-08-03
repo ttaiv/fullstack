@@ -1,7 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { ALL_BOOKS } from '../queries'
+import { useState } from 'react'
+import Select from 'react-select'
 
 const Books = () => {
+
+  const [selectedGenre, setSelectedGenre] = useState(null)
 
   const booksResult = useQuery(ALL_BOOKS)
 
@@ -11,12 +15,22 @@ const Books = () => {
     )
   }
 
-  const books = booksResult.data.allBooks
+  const allBooks = booksResult.data.allBooks
+  const genres = [...new Set(allBooks.flatMap(b => b.genres))]
+  const genreOptions = genres.map(g => ({ value: g, label: g }))
+  const books = selectedGenre ? allBooks.filter(b => b.genres.includes(selectedGenre.value)) : allBooks
 
   return (
     <div>
       <h2>books</h2>
-
+      <div>
+        in genre <Select
+          defaultValue={selectedGenre}
+          onChange={setSelectedGenre}
+          options={genreOptions}
+          placeholder='all genres'
+        />
+      </div>
       <table>
         <tbody>
           <tr>

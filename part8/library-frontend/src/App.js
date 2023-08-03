@@ -1,9 +1,12 @@
 import { Link, Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+import { useApolloClient } from '@apollo/client'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import LoginForm from './components/LoginForm'
 
-const NavigationMenu = () => {
+const NavigationMenu = ({ loginSuccesful, handleLogout }) => {
   const menuStyle = {
     background: '#f0f0f0',
     padding: '10px',
@@ -17,24 +20,41 @@ const NavigationMenu = () => {
     borderRadius: '5px',
   };
 
+  const logoutStyle = {
+    ...linkStyle,
+    cursor: 'pointer'
+  };
+
   return (
     <div style={menuStyle}>
       <Link to='/' style={linkStyle}>authors</Link>
       <Link to='/books' style={linkStyle}>books</Link>
-      <Link to='/addBook' style={linkStyle}>add book</Link>
+      {loginSuccesful && <Link to='/addBook' style={linkStyle}>add book</Link>}
+      {loginSuccesful && <span onClick={handleLogout} style={logoutStyle}>logout</span>}
+      {!loginSuccesful && <Link to='/login' style={linkStyle}>login</Link>}
     </div>
   )
 }
 
 const App = () => {
 
+  const [token, setToken] = useState(null)
+  const client = useApolloClient()
+
+  const handleLogout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+
   return (
     <div>
-      <NavigationMenu />
+      <NavigationMenu loginSuccesful={token !== null} handleLogout={handleLogout}/>
       <Routes>
         <Route path='/' element={<Authors />} />
         <Route path='/books' element={<Books />} />
         <Route path='/addBook' element={<NewBook />} />
+        <Route path='/login' element={<LoginForm setToken={setToken} />} />
       </Routes>
     </div>
   )

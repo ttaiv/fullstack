@@ -17,6 +17,8 @@ mongoose.connect(MONGODB_URI)
     console.log('error connection to MongoDB:', error.message)
   })
 
+/*
+
 let authors = [
   {
     name: 'Robert Martin',
@@ -43,6 +45,8 @@ let authors = [
   },
 ]
 
+*/
+
 /*
  * Suomi:
  * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan yhteyteen tekijän nimen sijaan tekijän id
@@ -56,6 +60,8 @@ let authors = [
  * Podría tener más sentido asociar un libro con su autor almacenando la id del autor en el contexto del libro en lugar del nombre del autor
  * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conección con el libro
 */
+
+/*
 
 let books = [
   {
@@ -108,6 +114,8 @@ let books = [
     genres: ['classic', 'revolution']
   },
 ]
+
+*/
 
 /*
   you can remove the placeholder query once your first own has been implemented 
@@ -162,14 +170,14 @@ const resolvers = {
     allAuthors: async () => Author.find({})
   },
   Author : {
-    bookCount: (root) => {
-      const bookCount = books.filter(book => book.author === root.name).length
+    bookCount: async (root) => {
+      const bookCount = await Book.countDocuments({ author: root._id })
       return bookCount
     }
   },
   Book: {
     author: async (root) => {
-      const author = Author.findById(root.author)
+      const author = await Author.findById(root.author)
       return author
     }
   },
@@ -206,14 +214,15 @@ const resolvers = {
       return book
     },
     
-    editAuthor: (root, args) => {
+    editAuthor: async (root, args) => {
       const { name, setBornTo } = args
-      const authorToEdit = authors.find(author => author.name === name)
+      const authorToEdit = await Author.findOne({ name: name })
       if (!authorToEdit) {
         return null
       }
-      const updatedAuthor = { ...authorToEdit, born: setBornTo }
-      authors = authors.map(author => author.name === name ? updatedAuthor : author)
+      const updatedAuthor = await Author.findByIdAndUpdate(authorToEdit._id, { born: setBornTo }, {
+        new: true
+      })
       return updatedAuthor
     }
   }

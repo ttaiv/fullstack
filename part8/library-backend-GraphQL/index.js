@@ -6,6 +6,8 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 const Author = require('./models/Author')
 const Book = require('./models/Book')
+const User = require('./models/User')
+const jwt = require('jsonwebtoken')
 require ('dotenv').config()
 const MONGODB_URI = process.env.MONGODB_URI
 
@@ -135,11 +137,20 @@ const typeDefs = `
     born: Int
     bookCount: Int!
   }
+  type User {
+    username: String!
+    favoriteGenre: String!
+    id: ID!
+  }
+  type Token {
+    value: String!
+  }
   type Query {
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+    me: User
   }
   type Mutation {
     addBook(
@@ -150,8 +161,27 @@ const typeDefs = `
     ): Book
 
     editAuthor(name: String!, setBornTo: Int!): Author
+    
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `
+// Needed when token is not included in the header
+const validateAutentication = (context) => {
+  if (!context.currentUser) {
+    throw new GraphQLError('Not authenticated', {
+      extensions: {
+        code: 'UNAUTHENTICATED'
+      }
+    })
+  }
+}
 
 const resolvers = {
   Query: {
@@ -167,7 +197,8 @@ const resolvers = {
 
       return returnedBooks
     },
-    allAuthors: async () => Author.find({})
+    allAuthors: async () => Author.find({}),
+    me: (root, args, context) => context.currentUser
   },
   Author : {
     bookCount: async (root) => {
@@ -182,7 +213,9 @@ const resolvers = {
     }
   },
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      validateAutentication(context)
+
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         author = new Author({ name: args.author })
@@ -190,6 +223,7 @@ const resolvers = {
       const book = new Book({ ...args, author: author._id })
 
       try {
+        // Validate both first so that either both or none are saved
         await book.validate()
         await author.validate()
         await book.save()
@@ -205,7 +239,8 @@ const resolvers = {
       return book
     },
     
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      validateAutentication(context)
       const { name, setBornTo } = args
       const authorToEdit = await Author.findOne({ name: name })
       if (!authorToEdit) {
@@ -215,6 +250,40 @@ const resolvers = {
         new: true
       })
       return updatedAuthor
+    },
+
+    createUser: async (root, args) => {
+      const { username, favoriteGenre } = args
+      const user = new User({ username, favoriteGenre })
+      try {
+        await user.save()
+      } catch (error) {
+        throw new GraphQLError('User creation failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            error
+          }
+        })
+      }
+      return user
+    },
+
+    login: async (root, args) => {
+      const { username, password } = args
+      const user = await User.findOne({ username })
+
+      if (!user || password !== 'sekret') {
+        throw new GraphQLError('Wrong credentials', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+          }
+        })
+      }
+      const userForToken = {
+        username: user.username,
+        id: user._id,
+      }
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
     }
   }
 }
@@ -226,6 +295,22 @@ const server = new ApolloServer({
 
 startStandaloneServer(server, {
   listen: { port: 4000 },
+  context: async ({ req }) => {
+    const auth = req ? req.headers.authorization : null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      try {
+        const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET)
+        const currentUser = await User.findById(decodedToken.id)
+        return { currentUser }
+      } catch (error) {
+        throw new GraphQLError('Invalid token', {
+          extensions: {
+            code: 'UNAUTHENTICATED',
+          }
+        })
+      }
+    }
+  }
 }).then(({ url }) => {
   console.log(`Server ready at ${url}`)
 })

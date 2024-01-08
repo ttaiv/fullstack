@@ -1,3 +1,6 @@
 [submodule "part3/fullstack_phonebook_backend"]
 	path = part3/fullstack_phonebook_backend
 	url = https://github.com/ttaiv/fullstack_phonebook_backend
+[submodule "part4/fullstack_part4"]
+	path = part4/fullstack_part4
+	url = https://github.com/ttaiv/fullstack_part4

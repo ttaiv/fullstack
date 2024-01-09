@@ -10,3 +10,6 @@
 [submodule "part6_advanced_state_management/query-anecdotes-frontend"]
 	path = part6_advanced_state_management/query-anecdotes-frontend
 	url = git@github.com:ttaiv/query-anecdotes-frontend.git
+[submodule "part10_react_native/repository-mobile-app"]
+	path = part10_react_native/repository-mobile-app
+	url = git@github.com:ttaiv/repository-mobile-app.git

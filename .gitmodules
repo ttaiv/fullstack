@@ -4,3 +4,6 @@
 [submodule "part4/fullstack_part4"]
 	path = part4/fullstack_part4
 	url = https://github.com/ttaiv/fullstack_part4
+[submodule "part5/fullstack-bloglist-frontend"]
+	path = part5/fullstack-bloglist-frontend
+	url = git@github.com:ttaiv/fullstack-bloglist-frontend.git

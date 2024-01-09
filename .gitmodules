@@ -7,3 +7,6 @@
 [submodule "part5/fullstack-bloglist-frontend"]
 	path = part5/fullstack-bloglist-frontend
 	url = git@github.com:ttaiv/fullstack-bloglist-frontend.git
+[submodule "part6/query-anecdotes-frontend"]
+	path = part6/query-anecdotes-frontend
+	url = git@github.com:ttaiv/query-anecdotes-frontend.git

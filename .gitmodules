@@ -1,0 +1,12 @@
+[submodule "part3_programming_server_with_nodejs_and_express/fullstack_phonebook_backend"]
+	path = part3_programming_server_with_nodejs_and_express/fullstack_phonebook_backend
+	url = git@github.com:ttaiv/fullstack_phonebook_backend.git
+[submodule "part4_testing_express_servers_and_user_administration/fullstack_part4"]
+	path = part4_testing_express_servers_and_user_administration/fullstack_part4
+	url = git@github.com:ttaiv/fullstack_part4.git
+[submodule "part5_testing_react_apps/fullstack-bloglist-frontend"]
+	path = part5_testing_react_apps/fullstack-bloglist-frontend
+	url = git@github.com:ttaiv/fullstack-bloglist-frontend.git
+[submodule "part6_advanced_state_management/query-anecdotes-frontend"]
+	path = part6_advanced_state_management/query-anecdotes-frontend
+	url = git@github.com:ttaiv/query-anecdotes-frontend.git
